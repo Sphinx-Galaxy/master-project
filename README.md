@@ -22,17 +22,12 @@ Here the discussed techniques are setup and tested with artifical datasets. Thei
 
 ## Framework
 
-T.B.D.
+The framework refers mostly to the Model Management Service developed at DLR.
 
 ## Implementation
 
-T.B.D.
+Building of models in python and saving them as serial-buffers. This allows us to read and execute them in a C program. The C code is also shown in detail an explained.
 
 ## Validation
 
-T.B.D.
-
-## Conclusion
-
-T.B.D.
-
+Check if the models work as intended in the lab as well as on the payload device.
