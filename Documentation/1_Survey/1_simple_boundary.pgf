@@ -1,0 +1,62 @@
+﻿\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+
+\begin{tikzpicture}[
+        %We set the scale and define some styles
+        scale=0.75,
+        axis/.style={very thick, ->, >=stealth'},
+        important line/.style={thick},
+        dashed line/.style={dashed, thick},
+        every node/.style={color=black,}
+     ]
+
+     % Important coordinates are defined
+     \coordinate (upper_bound_start) at (0,4);
+     \coordinate (upper_bound_stop) at (15,4);
+     \coordinate (lower_bound_start) at (0,-2);
+     \coordinate (lower_bound_stop) at (15,-2);
+
+     % Everything for x>0
+     \begin{scope}
+         \shade[bottom color=red, top color=white]
+             ($(upper_bound_start)+(0,2)$) rectangle (upper_bound_stop);
+     \end{scope}
+     %  Everything for x>0
+     \begin{scope}
+         \shade[bottom color=white, top color=blue]
+             ($(lower_bound_start)-(0,2)$) rectangle (lower_bound_stop);
+    \end{scope}
+
+     % axis
+     \draw[axis] (0,0)  -- (15,0) node(xline)[right] {time};
+     \draw[axis] (0,-4) -- (0,6) node(yline)[above] {\SI{}{\celsius}};
+
+	% Sine curve
+	\draw[important line] (0,0) sin (5,1);
+	\draw[important line] (5,1) cos (10,0);
+	\draw[important line] (10,0) sin (15,-1);
+
+	% Expected line
+	\draw[dashed line] (0, 1) -- (15, 1);
+
+	% Legend
+    \begin{axis}[
+    hide axis,
+	at={(175, -350)},
+    xmin=0,
+    xmax=15,
+    ymin=-4,
+    ymax=6,
+    legend style={draw=white!15!black,legend cell align=left}
+    ]
+     \addlegendimage{red}
+     \addlegendentry[scale=1/0.75]{Upper Bound};
+     \addlegendimage{black, dash pattern=on 3pt off 3 pt}
+     \addlegendentry[scale=1/0.75]{Expected Temperature};
+     \addlegendimage{black}
+     \addlegendentry[scale=1/0.75]{Actual Temperature};
+     \addlegendimage{blue}
+     \addlegendentry[scale=1/0.75]{Lower Bound};
+    \end{axis}
+
+\end{tikzpicture}

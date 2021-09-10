@@ -1,0 +1,146 @@
+% Document setup
+\input{Misc/preamble_usepackages}
+
+\usepackage{csquotes}
+\usepackage{float}
+
+\def\reporttype{Project Report}
+\def\reporttitle{Examination of A.I. Machine Learning Algorithms and Definition of a Framework as Service for Anomaly Detection in Spacecraft On-Board Data}
+\def\reportauthor{Mattis Jaksch}
+\def\reportsurveyfirst{Prof. Dr. Andreas Rittweger \\ & Dr. Frank Dannemann}
+%\def\reportsurveysecond{Dr. Frank Dannemmann}  %Auskommentieren für Projektarbeiten oä (ohne Zweitgutachter)
+\def\reportadvisor{Jan-Gerd Meß}
+\def\reportdate{}
+
+\newboolean{plaintitle}
+\setboolean{plaintitle}{false}	%true = Titelseite ohne graue Balken
+
+% Start here
+\begin{document}
+
+\include{Misc/FancyCover}
+
+% Vorspann
+{\frontmatter
+	{\pagestyle{scrheadings}
+		\setcounter{page}{1}
+		\pagenumbering{roman}
+
+\thispagestyle{empty}
+\input{Misc/Explaination2015}		
+\thispagestyle{empty}
+%\include{Misc/Acknowledgement}		
+
+\tableofcontents
+
+\chapter{Abbreviations}
+
+\begin{acronym}
+\acro{athmos}[ATHMoS]{Automated Telemetry Health Monitoring System}
+\acro{aec}[AEC]{Auto-Encoder}
+%\acro{dlr}[DLR]{German Aerospace Center}
+%\acro{esa}[ESA]{European Space Agency}
+\acro{gsoc}[GSOC]{German Space Operation Center}
+\acro{knn}[KNN]{k-Nearest-Neighbour}
+\acro{lstm}[LSTM]{Long Short-Term Memory}
+\acro{ml}[ML]{Machine Learning}
+\acro{rnn}[RNN]{Recurrent Neural Net}
+%\acro{obc}[OBC]{On-Board Computer}
+\acro{outpost}[OUTPOST]{Open Modular Software Platform for Spacecraft}
+\acro{pus}[PUS]{Package Utilization Standard}
+\acro{soc}[SoC]{System-on-a-Chip}
+\acro{spc}[SC]{Spacecraft}
+\acro{svm}[SVM]{Support Vector Machine}
+%\acro{tmtc}[TMTC]{Telemetry / Telecommand}
+\end{acronym}
+
+% Hauptteil
+{\mainmatter
+	\pagestyle{scrheadings}
+	\pagenumbering{arabic}
+	
+\chapter{Abstract}
+Every spacecraft acquires data from many sensors as well as internal states to tell the systems current health status. This data usually gets downloaded and analysed on ground to find errors and anomalies. As this data is too incomprehensible to be analysed by simple automated limit checking techniques and evidently too much for a human, a demand for more sophisticated analysis techniques exists. 
+
+With increasing computing power on modern satellites, a completely automatic data-processing and analysis chain could be executed on board. This bears the advantage of decreasing data traffic between ground and satellite as well as being able to find and handle errors and anomalies much faster.
+
+In this project we will first look at anomaly definitions. Then, current detection approaches and recently developed ideas are examined. The focus here lies on machine learning techniques, including \acp{rnn}, \acp{aec}, \acp{svm} and \acp{knn}. \ac{ml} has the advantage of being able to work and improve in almost unknown environments.
+
+With this overview, a selection of techniques will be made for further investigation in the second chapter. They will be compared in their performance distinguishing normal and anomalous values in generated datasets. %The selection will be based on requirements with respect to the type of sensory data and the spacecraft's environment. 
+
+In the third chapter a framework will be developed to include the machine learning technique into to the currently used flight software and to make it compliant with the \ac{pus} service. %This involves describing an additional custom service type.
+
+With the framework laid out, the implementation in the \enquote{\ac{outpost}} library will be described in the fourth chapter. The code will be run on a demonstrator to show and conform its functionality.
+
+%In the fifth chapter, the predictability and reliability, as well as risk of over- and under-fitting for the chosen technique will be analysed. Therefore we will shortly discuss principles and methods of verifying and validating machine learning techniques. 
+
+%%% Start Include Files %%%
+\input{1_Survey/Survey.tex}
+
+\input{2_Selection/Selection.tex}
+
+\input{3_Framework/Framework.tex}
+
+\input{4_Implementation/Implementation.tex}
+
+%\input{5_Validation/Validation.tex}
+%% End of Inclusion %%%
+
+\chapter{Conclusion}
+
+In this project it was shown, that more sophisticated techniques for spacecraft data analysis are needed and that this demand can be matched with machine learning techniques including neural networks. The possible solutions involved \acfp{aec}, \acfp{svm} and \acfp{lstm} provided by the Tensorflow library \cite{tf-web}.\newline
+In a further analysis these three types of networks were discussed and compared. And they did prove to be able to detect contextual anomalies with feasible effort.
+
+The \ac{aec} did show to be the most cost-effective solution for simple and repetitive data. Whereas the \ac{lstm} infers a higher computational load, that might, however, lead to the detection of more complex anomalies that are beyond the scope of this study. The highest computational load was induced by the \ac{svm}, which was always behind regarding detection rates.
+
+As the neural networks proved to be effective in detecting anomalies, a framework for providing these techniques on board of a satellite was developed. \newline
+The framework did define the steps of converting the machine learning model to a serialized version for the upload from ground to space. The upload management was set to be done via the \acf{pus} standard. On board the execution was defined to be handed over to a specific application.
+
+The workflow was then demonstrated as proof-of-concept on an evaluation board with an ARM processor. The demonstration did show the way from the development of the machine learning model till the execution on the evaluation board. \newline
+This did prove to be a feasible and effective way of implementing autonomous anomaly detection on board of a spacecraft.
+
+\renewcommand\cleardoublepage{%
+ \clearpage
+ \ifodd\value{page}\else\stepcounter{page}\fi
+}
+
+\appendix
+
+\bibliographystyle{unsrtdin} %gerdipl} %unsrt %gerdipl
+\bibliography{Appendix/books} % BIB-Datei mit Literatur
+
+
+\chapter{Source Code}
+
+\section{Auto-Encoder}
+\label{c:src_aec}
+\begin{lstlisting}[caption={Auto-Encoder}, language=python]
+aec = tf.keras.Sequential(tf.keras.Input(shape=(datasize,)),
+ tf.keras.layers.Dense(units=25, activation="tanh"),
+ tf.keras.layers.Dense(units=datasize, 
+  activation="sigmoid"),])
+\end{lstlisting}
+
+\section{Long Short-Term Memory}
+\label{c:src_lstm}
+\begin{lstlisting}[caption={Long Short-Term Memory}, language=python]
+lstm = tf.keras.Sequential(tf.keras.Embedding
+  (10, 10, input_length=datasize),
+ tf.keras.LSTM(1),
+ tf.keras.layers.Dense(units=datasize, activation="tanh"),])
+\end{lstlisting}
+
+\newpage
+\section{Support Vector Machine}
+\label{c:src_svm}
+\begin{lstlisting}[caption={Support Vector Machine}, language=python]
+svm = tf.keras.Sequential(tf.keras.Input(shape=(datasize,)),
+ tf.keras.layers.experimental.RandomFourierFeatures(
+  output_dim=2048, kernel_initializer="laplacian", 
+  trainable=True),
+ tf.keras.layers.Dense(units=2, activation="sigmoid"),])
+\end{lstlisting}
+
+%\input{Appendix/Bibliography.tex}
+
+\end{document}

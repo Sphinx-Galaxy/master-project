@@ -1,0 +1,49 @@
+﻿\begin{tikzpicture}[
+	block/.style={
+		circle,
+		minimum size=5em,
+		draw=black,
+		thick,
+		fill=black!20,
+		align=center,
+	},
+	scale=0.9
+]
+
+\draw[color=blue, fill=blue!50] (-6,-5) rectangle (6,5);
+\node[align=center,color=blue] at (0, 5.5) {On Ground};
+\draw[color=green, fill=black!20!green!50] (6,-5) rectangle (11,5);
+\node[align=center,color=black!20!green] at (8.5, 5.5) {On Board};
+
+\draw[color=black, fill=black!5] (2.5,0.5) rectangle (9.5,3.5);
+
+\node[block] (cm) at (-1.5,3) {Convert\\ Model};
+
+\node[block] (rm) at (-4,0) {Retrain\\ Model};
+\node[block] (vm) at (1,0) {Validate\\ Model};
+
+\node[block] (sm) at (1,-3) {Serialize\\ Model};
+
+\draw[->,ultra thick] (cm.south) -- (rm.60);
+\draw[->,ultra thick] (cm.south) -- (vm.120);
+\draw[->,ultra thick] (rm.east) -- (vm.west);
+\draw[->,ultra thick] (vm.south) -- (sm.north);
+
+\draw[->,ultra thick] (-5,4) .. node[pos=0.2, above] {Model File} controls (-2.5,4) .. (cm.120);
+\draw[->,ultra thick] (-5,2) .. node[pos=0.2, above] {Target Info} controls (-2.5,2) .. (cm.240);
+
+\node[block] (gpr) at (4,2) {Create\\ PUS\\ Request};
+\node[align=center] (cmf) at (4,-0.5) {Converted\\ Model\\ File};
+\draw[->,ultra thick] (sm.east) .. controls (4,-2) .. (cmf.south);
+\draw[->,ultra thick] (cmf.north) -- (gpr.south);
+
+\node[block] (epr) at (8,2) {Execute\\ PUS\\ Request};
+\draw[->,ultra thick] (gpr.east) -- (epr.west);
+
+\node[align=center] (lmf) at (8,-0.5) {Loaded\\ Model\\ File};
+\node[align=center,thick,rectangle,draw=black,fill=black!10, minimum width=6em, minimum height=4em] (ta) at (8,-3) {Target\\ Application};
+
+\draw[->,ultra thick] (epr.south) -- (lmf.north);
+\draw[->,ultra thick] (lmf.south) -- (ta.north);
+
+\end{tikzpicture}

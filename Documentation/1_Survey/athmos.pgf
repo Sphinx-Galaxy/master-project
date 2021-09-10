@@ -1,0 +1,46 @@
+﻿\begin{tikzpicture}[
+    block/.style={
+      rectangle,
+      draw=black,
+      thick,
+      fill=black!20,
+      align=center,
+      rounded corners,
+      minimum height=2em
+    },
+    scale=0.9
+]
+
+\node[block,minimum height=4em] (aad) at (0,5) {ATHMoS Anomaly Detection};
+\node[block] (ctfv) at (0,3) {Concatenate the Feature Vectors};
+
+\draw[->,ultra thick,scale=1.5] (ctfv) -- (aad);
+
+\draw[dashed] (-7.5,-2.25) rectangle (-2.5,2.25);
+
+\node[] (hl) at (-5,3) {};
+\node[block, minimum width=6em] (hl3) at (-5,1.5) {Hidden Layer};
+\node[block, minimum width=8em] (hl2) at (-5,0) {Hidden Layer};
+\node[block, minimum width=10em] (hl1) at (-5,-1.5) {Hidden Layer};
+
+\draw[ultra thick,scale=1.5] (hl3.north) -- (hl.center);
+\draw[->,ultra thick,scale=1.5] (hl.center) -- (ctfv.west);
+\draw[->,ultra thick,scale=1.5] (hl2) -- (hl3);
+\draw[->,ultra thick,scale=1.5] (hl1) -- (hl2);
+
+\node[] (edge) at (5,3) {};
+\node[block, minimum height=10em] (afvc) at (5,0) {ATHMoS Feature Vector Calculator};
+\draw[ultra thick,scale=1.5] (afvc.north) -- (edge.center);
+\draw[->,ultra thick,scale=1.5] (edge.center) -- (ctfv.east);
+
+\node[] (edge1) at (5,-3) {};
+\node[] (edge2) at (-5,-3) {};
+\node[block, minimum width=10em] (ird) at (0,-3) {Input Raw Data};
+
+\draw[ultra thick,scale=1.5] (ird.east) -- (edge1.center);
+\draw[->,ultra thick,scale=1.5] (edge1.center) -- (afvc.south);
+
+\draw[ultra thick,scale=1.5] (ird.west) -- (edge2.center);
+\draw[->,ultra thick,scale=1.5] (edge2.center) -- (hl1.south);
+
+\end{tikzpicture}

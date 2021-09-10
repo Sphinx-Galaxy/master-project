@@ -1,0 +1,61 @@
+\documentclass[10pt,a4paper]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{csquotes}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{url}
+
+%\usepackage[margin=40mm]{geometry}
+
+\title{Project Proposal}
+\author{Mattis Jaksch}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\flushleft
+
+\section*{Working Title}
+Examination of A.I. Machine Learning Algorithms and Definition of a Framework as Service for Anomaly Detection in Spacecraft On-Board Data.
+
+%Detection of Anomalies in Satellite OnBoard Sensor Data with the Help of A.I.
+
+\section*{Problem Description}
+With increased computing power in satellites, the amount of sensors and produced data has exceeded the bounds of primitive evaluation techniques. As of yet mostly basic methods like Out-Of-Limit (OOL) checks are implemented to detected malfunctions in this mass of data. These methods do not only lack accuracy, as limits may not be known beforehand, but also fail to find long or contextual anomalous variations. And especially for highly varying or unknown input data simple methods are completely inconceivable and therefore complex evaluation algorithms are required. 
+In particular if one thinks of deep-space missions, where the round-trip time is so high, that the vehicle is forced to act nearly autonomous as human interaction is not possible. By that, one can also reduce human operator time as workload is shifted towards satellites and early warning system can prevent costly recovering techniques.
+
+\section*{Solution approach}
+To improve evaluation complexity and distinguish normal as well as anomalous features, Artificial Intelligence (AI) is used. To achieve this, various available techniques and algorithms \cite{athmos} \cite{aiforspace} are analysed and discussed. These different techniques need to be evaluated regarding their performance, accuracy and resource utilisation. Also a look at their complexity and verification ability is taken.
+
+With the chosen technique, a framework and service have to be defined for implementing and uploading an AI anomaly detection model onto the satellite.
+
+\section*{Working Structure}
+The project is divided into five work packages. At first, a survey on different anomaly detection techniques is done, whereby the applicability in satellites is analysed regarding their performance and accuracy. However the main focus is on resource utilisation as computation power on satellites is sparse. The second step is to run the chosen algorithms on real satellite data and also compare them with the primitive approaches like OOL. After this, at least one reasonable candidate is selected. As third package, a framework for interfacing will be build based on the PUS standard \cite{pus}. In the fourth package, this framework is then integrated into the OUTPOST library and tested on real hardware. As fifth and last step, the algorithm will be tested and verification methods of these models will be discussed.
+
+\begin{thebibliography}{9}
+\bibitem{athmos} 
+Corey O'Meara, Leonard Schlag, Luisa Faltenbacher and Martin Wickler.
+\textit{ATHMoS: Automated Telemetry Health Monitoring System at GSOC using Outlier Detection and Supervised Machine Learning}. 
+German Aerospace Center, Wessling, Germany
+
+\bibitem{aiforspace} 
+Jan-Gerd Meß, Frank Dannemann and Fabian Greif.
+\textit{Techniques of Artificial Intelligence for Space Applications - A Survey}. 
+Conference Paper, February 2019
+
+\bibitem{pus} 
+European Cooperation for Space Standardization
+\textit{Telemetry and telecommand packet utilization}. 
+ECSS-E-ST-70-41C, April 2016
+
+\end{thebibliography}
+
+\end{document}

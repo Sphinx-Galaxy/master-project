@@ -1,0 +1,246 @@
+@book{stbook,
+	author = {Ley, Wilfried and Wittmann, Klaus and Hallmann, Willi},
+	publisher = {Wiley},
+	title = {Handbook of Space Technology},
+	year = {2009}
+}
+
+@inproceedings{athmos,
+	author = {O'Meara, Corey and Schlag, Leonard and Faltenbacher, Luisa and Wickler, M.},
+	booktitle = {ATHMoS: Automated Telemetry Health Monitoring System at GSOC using Outlier Detection and Supervised Machine Learning},
+	pages = {17},
+	title = {ATHMoS: Automated Telemetry Health Monitoring System at GSOC using Outlier Detection and Supervised Machine Learning},
+	year = {2016}
+}
+
+@inproceedings{ai-dlr-survey,
+	abstract = {The possibilities to observe and interact with any
+given spacecraft are naturally limited compared to groundbased systems due to a number of factors. These include but are
+not limited to the availability and bandwidth of their connection
+to ground, the availability of staff, communication latencies and
+power budgets.
+While a minimum level of autonomy is required for every spacecraft, past experiments and missions have shown that introducing more sophisticated autonomy mechanisms can drastically
+increase the efficiency for many missions in terms of reliability,
+science output and required operational effort.
+Artificial intelligence poses an increasingly popular approach
+for implementing on-board autonomy. The number of techniques and variants of artificial intelligence available in the
+literature is, however, just as diversified as their potential field
+of application. To provide an overview of the current state
+of the art of artificial intelligence and its application for space
+systems, this paper provides an extensive survey on existing
+techniques and algorithms as well as existing and potential
+applications on board spacecraft and on ground. The survey
+focuses on autonomous planning and scheduling of operations,
+self-awareness, anomaly detection and Fault Detection Isolation
+and Recovery (FDIR), on-board data analysis as well as onboard operations and processing of earth-observation data.},
+	author = {Me{\ss}, Jan-Gerd and Dannemann, Frank and Greif, Fabian},
+	booktitle = {European Workshop on On-Board Data Processing (OBDP2019)},
+	journal = {European Workshop on On-Board Data Processing (OBDP2019)},
+	keywords = {Artificial Intelligence; Autonomy; FDIR},
+	month = {February},
+	pages = {14},
+	publisher = {European Space Agency},
+	title = {Techniques of Artificial Intelligence for Space Applications - A Survey},
+	url = {https://elib.dlr.de/129255/},
+	year = {2019}
+}
+
+@manual{pus,
+	author = {ESA},
+	chapter = {ECSS-E-ST-70-41C},
+	month = {April},
+	title = {Telemetry and telecommand packet utilization},
+	year = {2016}
+}
+
+@inproceedings{athmos-sub,
+	author = {O'Meara, Corey and Schlag, Leonard and Wickler, Martin},
+	booktitle = {Applications of Deep Learning Neural Networks to Satellite Telemetry Monitoring},
+	doi = {10.2514/6.2018-2558},
+	month = {05},
+	pages = {16},
+	title = {Applications of Deep Learning Neural Networks to Satellite Telemetry Monitoring},
+	year = {2018}
+}
+
+@inbook{mars-entry,
+	author = {Karlgaard, Chris and Kutty, Prasad and Shidner, Jeremy and Schoenenberger, Mark and Munk, Michelle},
+	booktitle = {51st AIAA Aerospace Sciences Meeting including the New Horizons Forum and Aerospace Exposition},
+	chapter = {},
+	doi = {10.2514/6.2013-28},
+	eprint = {https://arc.aiaa.org/doi/pdf/10.2514/6.2013-28},
+	pages = {},
+	title = {Mars Entry Atmospheric Data System Trajectory Reconstruction Algorithms and Flight Results},
+	url = {https://arc.aiaa.org/doi/abs/10.2514/6.2013-28}
+}
+
+@misc{tet,
+	author = {DLR},
+	booktitle = {https://www.dlr.de/rd/desktopdefault.aspx/tabid-2274/3396\_read-5085/},
+	month = {1},
+	title = {Technologieerprobungstr{\"a}ger TET},
+	year = {2021}
+}
+
+@book{ai-modern,
+	author = {Russel, Stuart J. and Norvig, Peter},
+	title = {Artificial Intelligence - A Modern Approach},
+	year = {2009}
+}
+
+@book{ai-example,
+	author = {Rothman, Denis},
+	title = {Artificial Intelligence by example},
+	year = {2018}
+}
+
+@inproceedings{auto-enc-1,
+	abstract = {This paper proposes to use autoencoders with nonlinear dimensionality reduction in the anomaly detection task. The authors apply dimensionality reduction by using an autoencoder onto both artificial data and real data, and compare it with linear PCA and kernel PCA to clarify its property. The artificial data is generated from Lorenz system, and the real data is the spacecrafts' telemetry data. This paper demonstrates that autoencoders are able to detect subtle anomalies which linear PCA fails. Also, autoencoders can increase their accuracy by extending them to denoising autoenconders. Moreover, autoencoders can be useful as nonlinear techniques without complex computation as kernel PCA requires. Finaly, the authors examine the learned features in the hidden layer of autoencoders, and present that autoencoders learn the normal state properly and activate differently with anomalous input.},
+	author = {Sakurada, Mayu and Yairi, Takehisa},
+	booktitle = {Proceedings of the MLSDA 2014 2nd Workshop on Machine Learning for Sensory Data Analysis},
+	doi = {10.1145/2689746.2689747},
+	isbn = {9781450331593},
+	keywords = {auto-assosiative neural network; dimensionality reduction; spacecrafts; anomaly detection; novelty detection; denoising autoencoder; nonlinear; fault detection; autoencoder},
+	location = {Gold Coast, Australia QLD, Australia},
+	numpages = {8},
+	pages = {4--11},
+	publisher = {Association for Computing Machinery},
+	series = {MLSDA'14},
+	title = {Anomaly Detection Using Autoencoders with Nonlinear Dimensionality Reduction},
+	url = {https://doi.org/10.1145/2689746.2689747},
+	year = {2014}
+}
+
+@book{math-std,
+	author = {Bartsch, Hans-Jochen},
+	publisher = {Hanser},
+	title = {Mathematische Formeln f{\"u}r Ingenieure und Naturwissenschaftler},
+	year = {2014}
+}
+
+@inproceedings{sc-lstm-detection,
+	author = {Hundman, Kyle and Constantinou, Valentino and Laporte, Christopher and Colwell, Ian and Soderstrom, Tom},
+	booktitle = {Detecting Spacecraft Anomalies Using LSTMs and Nonparametric Dynamic Thresholding},
+	doi = {10.1145/3219819.3219845},
+	month = {07},
+	pages = {387--395},
+	title = {Detecting Spacecraft Anomalies Using LSTMs and Nonparametric Dynamic Thresholding},
+	year = {2018}
+}
+
+@inproceedings{tf-svm,
+	abstract = {To accelerate the training of kernel machines, we propose to map the input data to a randomized low-dimensional feature space and then apply existing fast linear methods. The features are designed so that the inner products of the transformed data are approximately equal to those in the feature space of a user specified shift-invariant kernel. We explore two sets of random features, provide convergence bounds on their ability to approximate various radial basis kernels, and show that in large-scale classification and regression tasks linear machine learning algorithms applied to these features outperform state-of-the-art large-scale kernel machines.},
+	author = {Rahimi, Ali and Recht, Benjamin},
+	booktitle = {Proceedings of the 20th International Conference on Neural Information Processing Systems},
+	isbn = {9781605603520},
+	location = {Vancouver, British Columbia, Canada},
+	numpages = {8},
+	pages = {1177--1184},
+	publisher = {Curran Associates Inc.},
+	series = {NIPS'07},
+	title = {Random Features for Large-Scale Kernel Machines},
+	year = {2007}
+}
+
+@inproceedings{one-class-svm,
+	author = {Amer, Mennatallah and Goldstein, Markus and Abdennadher, Slim},
+	booktitle = {Enhancing one-class Support Vector Machines for unsupervised anomaly detection},
+	doi = {10.1145/2500853.2500857},
+	journal = {Proceedings of the ACM SIGKDD Workshop on Outlier Detection and Description, ODD 2013},
+	month = {08},
+	pages = {8--15},
+	title = {Enhancing one-class Support Vector Machines for unsupervised anomaly detection},
+	year = {2013}
+}
+
+@inproceedings{ssme,
+	author = {Park, H. and Mackey, R. and James, Mark and Zak, M. and Kynard, M. and Sebghati, J. and Greene, W.},
+	doi = {10.1109/AERO.2002.1036123},
+	isbn = {0-7803-7231-X},
+	month = {02},
+	pages = {6--2835 },
+	title = {Analysis of Space Shuttle main engine data using beacon-based exception analysis for multi-missions},
+	volume = {6},
+	year = {2002}
+}
+
+@article{svdd,
+	author = {Tax, David and Duin, Robert},
+	doi = {10.1023/B:MACH.0000008084.60811.49},
+	journal = {Machine Learning},
+	month = {01},
+	pages = {45--66},
+	title = {Support Vector Data Description},
+	volume = {54},
+	year = {2004}
+}
+
+@inproceedings{auto-enc-2,
+	abstract = {Deep autoencoders, and other deep neural networks, have demonstrated their effectiveness in discovering non-linear features across many problem domains. However, in many real-world problems, large outliers and pervasive noise are commonplace, and one may not have access to clean training data as required by standard deep denoising autoencoders. Herein, we demonstrate novel extensions to deep autoencoders which not only maintain a deep autoencoders' ability to discover high quality, non-linear features but can also eliminate outliers and noise without access to any clean training data. Our model is inspired by Robust Principal Component Analysis, and we split the input data X into two parts, $X = L_{D} + S$, where $L_{D}$ can be effectively reconstructed by a deep autoencoder and $S$ contains the outliers and noise in the original data X. Since such splitting increases the robustness of standard deep autoencoders, we name our model a "Robust Deep Autoencoder (RDA)". Further, we present generalizations of our results to grouped sparsity norms which allow one to distinguish random anomalies from other types of structured corruptions, such as a collection of features being corrupted across many instances or a collection of instances having more corruptions than their fellows. Such "Group Robust Deep Autoencoders (GRDA)" give rise to novel anomaly detection approaches whose superior performance we demonstrate on a selection of benchmark problems.},
+	author = {Zhou, Chong and Paffenroth, Randy C.},
+	booktitle = {Proceedings of the 23rd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+	doi = {10.1145/3097983.3098052},
+	isbn = {9781450348874},
+	keywords = {autoencoders; denoising; anomaly detection; group robust deep autoencoder; robust deep autoencoders},
+	location = {Halifax, NS, Canada},
+	numpages = {10},
+	pages = {665--674},
+	publisher = {Association for Computing Machinery},
+	series = {KDD '17},
+	title = {Anomaly Detection with Robust Deep Autoencoders},
+	url = {https://doi.org/10.1145/3097983.3098052},
+	year = {2017}
+}
+
+@inproceedings{out-detection,
+	author = {{Kieu}, T. and {Yang}, B. and {Jensen}, C. S.},
+	booktitle = {2018 19th IEEE International Conference on Mobile Data Management (MDM)},
+	doi = {10.1109/MDM.2018.00029},
+	number = {},
+	pages = {125--134},
+	title = {Outlier Detection for Multidimensional Time Series Using Deep Neural Networks},
+	volume = {},
+	year = {2018}
+}
+
+@mastersthesis{anomaly-basic,
+	author = {Polson, Shawn},
+	school = {Laboratory for Atmospheric and Space Physics},
+	title = {Unsupervised Machine Learning for Spacecraft Anomaly Detection in WebTCAD},
+	year = {2019}
+}
+
+@article{lstm,
+	author = {Hochreiter, Sepp and Schmidhuber, J{\"u}rgen},
+	doi = {10.1162/neco.1997.9.8.1735},
+	journal = {Neural computation},
+	month = {12},
+	pages = {1735--80},
+	title = {Long Short-term Memory},
+	volume = {9},
+	year = {1997}
+}
+
+@misc{tf-web,
+	author = {Mart{\'\i}n~Abadi and Ashish~Agarwal and Paul~Barham and Eugene~Brevdo and Zhifeng~Chen and Craig~Citro and Greg~S.~Corrado and Andy~Davis and Jeffrey~Dean and Matthieu~Devin and Sanjay~Ghemawat and Ian~Goodfellow and Andrew~Harp and Geoffrey~Irving and Michael~Isard and Jia, Yangqing and Rafal~Jozefowicz and Lukasz~Kaiser and Manjunath~Kudlur and Josh~Levenberg and Dandelion~Man{\'e} and Rajat~Monga and Sherry~Moore and Derek~Murray and Chris~Olah and Mike~Schuster and Jonathon~Shlens and Benoit~Steiner and Ilya~Sutskever and Kunal~Talwar and Paul~Tucker and Vincent~Vanhoucke and Vijay~Vasudevan and Fernanda~Vi{\'e}gas and Oriol~Vinyals and Pete~Warden and Martin~Wattenberg and Martin~Wicke and Yuan~Yu and Xiaoqiang~Zheng},
+	note = {Software available from tensorflow.org},
+	title = {{TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems},
+	url = {https://www.tensorflow.org/},
+	year = {2015}
+}
+
+@article{anomaly-survey,
+	author = {Chandola, V. and Banerjee, A. and Kumar, V.},
+	journal = {ACM Comput. Surv.},
+	pages = {15:1--15:58},
+	title = {Anomaly detection: A survey},
+	volume = {41},
+	year = {2009}
+}
+
+@misc{gnu-proj,
+	author = {{Free Software Foundation}},
+	title = {gnu.org},
+	year = {1984}
+}
+

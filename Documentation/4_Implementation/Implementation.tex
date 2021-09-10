@@ -1,0 +1,203 @@
+\chapter{Implementation of the Framework - Demonstration}
+The implementation will be done as a proof-of-concept and therefore kept minimalistic. The implementation includes the export of a Tensorflow model written in Python and the import and execution on an embedded system serving as demonstrator. The transfer will be excluded as this is already defined by various standards (e.g. \cite{spp}). 
+
+This chapter will lead through the entire building process of a complete demonstrator. \newline
+First the export and serialization of the model are demonstrated. In a second step the model has to be executed on a demonstration board running an embedded system. For that, the Tensorflow sources have to be cross-compiled to match the target system. Therefore the setup of a cross-compiler will be described as necessary prerequisite.
+
+\section{Model Export}
+To export and save a model in Python, only two steps are needed. The first step is to convert the model to a tf-lite model with the help of the \textit{TFLiteConverter}. The second step is the export itself.
+
+The conversion to a tf-lite model can happen on the basis of a saved model or a model built with either Tensorflow or Keras\footnote{Keras is an API built on top of Tensorflow and offers a more powerful framework}\cite{keras}. A typical conversion and export would look like the following example:
+
+\newpage
+\begin{lstlisting}[caption={model export}, language=python]
+# Convert the model
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+
+# Save the model
+with open('model.tflite', 'wb') as f:
+  f.write(tflite_model)
+\end{lstlisting}
+
+For models containing \acp{rnn} (like the \ac{lstm}) an additional conversion step is necessary, which will not be further investigated here.
+
+\section{Tensorflow Cross-Compilation}
+For cross-compilation an extra toolchain is needed. There are two options, either to take a pre-made toolchain or to forge a custom one. Here the decision was made for the latter. \newline
+The advantage of a custom toolchain is, that the whole compilation process can be completely understood. This helps in case of required modifications. Second, the modifications themselves are much easier to implement. And third, with understanding the build-process, there is also much more control of how the sources are compiled.
+
+In the following a custom toolchain for an ARM processor will be set up with the basic libraries. Once that is done, the Tensorflow sources will be compiled. With the complete toolchain set up, a simple program to load Tensorflow models in C++ on a demonstration board will be presented.
+
+\subsection{ARM Toolchain}
+For the toolchain the GNU compiler collection (\textit{gcc}) will be used. The toolchain will be solely based on the packages provided by the gnu project \cite{gnu-proj}. The only exception is the modified linux kernel which has been taken from Analog Devices Inc. The platform for working and compiling is a debian linux system hosted on a docker container. 
+
+For the cross-compiler to work, the necessary steps are to first build the \textit{binutils} and configure the \textit{linux headers}. With this at hand, the \textit{gcc} can be boostraped. Once the \textit{gcc} is partially compiled, the \textit{glibc} can also be partially compiled. With these partial \textit{glibc} the \textit{gcc} can be fully compiled and then be used to finalize the \textit{glibc}. A list of the used packages with concrete versions can be found in table \ref{t:software}.
+
+Once the compiler and the libraries are ready, the basic toolchain is set up and can be used for further cross-compilation.
+
+\begin{table}[htb]
+\centering
+\caption{Used sources for the cross-compilation.}
+\begin{tabular}{lll}
+\toprule
+Package			& Version	& Source \\ \midrule
+GCC				& 8.4.0 	& \url{gnu.org/software/gcc} \\
+Binutils		& 2.32 		& \url{gnu.org/software/binutils} \\
+GLIBC			& 2.28		& \url{gnu.org/software/libc} \\
+Linux Headers	& 4.9		& \url{github.com/analogdevicesinc/linux} \\
+\bottomrule
+\end{tabular}
+\label{t:software}
+\end{table}
+
+\subsection{Compiling Tensorflow Sources}
+Now the Tensorflow sources can be compiled to generate a usable library. For that, the corresponding source files are cloned from the git, modified and then run against the toolchain from the section before.
+
+\paragraph*{Sources} \hfill
+
+First the Tensorflow files in the version \textbf{r2.4} need to be downloaded:
+
+\begin{lstlisting}[caption={git clone}, language=bash]
+$ git clone https://github.com/tensorflow/tensorflow
+$ cd tensorflow
+$ git checkout r2.4
+\end{lstlisting}
+
+\paragraph*{Dependencies} \hfill
+
+The next step is to download the required dependencies:
+
+\begin{lstlisting}[caption={dependencies}, language=bash]
+$ ./tensorflow/tensorflow/lite/tools/make\
+	/download_dependencies.sh
+\end{lstlisting}
+
+\paragraph*{Modifications} \hfill
+
+To make the cross-compilation with ARM work, three files have to be modified. First the build script, second the \textit{Makefile} and third the \textit{util.cpp} file. Starting with the build script (\textit{./tensorflow/tensorflow/lite/tools/make/build\_aarch64\_lib.sh}):
+
+\begin{lstlisting}[caption={build\_aarch64\_lib.sh}, language=bash]
+[31] make -j ${NO_JOB} TARGET=arm -C "${TENSORFLOW_DIR}"\
+	-f tensorflow/lite/tools/make/Makefile $@
+\end{lstlisting}
+
+this can be saved as \textit{build\_arm\_lib.sh}.
+
+Next step is the \textit{Makefile} (\textit{./tensorflow/tensorflow/lite/tools/make/Makefile}):
+
+\begin{lstlisting}[caption={Makefile}, language=make]
+[51] INCLUDES += -I/home/dlr/arm/opt\
+	/arm-linux-gnueabihf/include
+...
+[61] -ldl \
+[62] -latomic
+...
+[70] LDOPTS := -L/home/dlr/arm/opt/arm-linux-gnueabihf/lib
+...
+[72] TARGET_TOOLCHAIN_PREFIX := arm-linux-gnueabihf-
+\end{lstlisting}
+
+And at last, one minor change has to made to the source file \textit{util.cpp} (\textit{./tensorflow/tensorflow/lite/tools/make/downloads/flatbuffers/src/util.cpp}):
+
+\begin{lstlisting}[caption={util.cpp}, language=c++]
+[36] -- #  include <limits.h>
+[36] ++ #  include <linux/limits.h>
+\end{lstlisting}
+
+\paragraph*{Final building step} \hfill
+
+Now the build script can be started:
+
+\begin{lstlisting}[caption={build\_arm\_lib.sh}, language=bash]
+$ ./tensorflow/tensorflow/lite/tools/make/build_arm_lib.sh
+\end{lstlisting}
+
+In the end, a library is generated which will be used for the projects. The library is located in \textit{tensorflow/tensorflow/lite/make/gen/arm\_x86\_64/lib/libtensorflow-lite.a}.
+
+%\paragraph*{Note:} There is also an experimental approach in tensorflow with CMake where only an additional toolchain definition file has to be generated. This approach has not been tested by the author.
+
+\subsection{Makefile for Custom Projects}
+Now that the ARM cross-compilation toolchain and Tensorflow libraries are both set up, they can be used to create and compile custom projects. The Makefile in listing \ref{l:make} shows only the most important configurations to use tensorflow. In the \textit{LIBFLAGS} the search destination for the tensorflow library is given, in this case it will be in the same directory as the Makefile itself. The tf-lite library is then specified within the \textit{LDFLAGS}. At last, the header file location needs to be set. In the case of the minimal example provided by Tensorflow, only the standard Tensorflow headers and the flatbuffers are needed. 
+
+This configuration will then be used for the model import in the next section.
+
+\begin{lstlisting}[caption={Makefile}, language=make, label={l:make}]
+LIBFLAGS := -L./
+LDFLAGS := -lstdc++ \
+-lpthread \
+-lm \
+-ldl \
+-lz \
+-latomic \
+-ltensorflow-lite
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d) \
+../tensorflow \
+../tensorflow/tensorflow/lite/tools/make/\
+	downloads/flatbuffers/include
+\end{lstlisting}
+
+\section{Model Import and Execution in C++}
+To import the model and execute the neural network within, a short program in C++ is written. This program loads the tf-lite model in its serialized form as a flatbuffer and performs some checks. If the model turns out to be valid the input data can be fed in. 
+
+As a demonstration and performance evaluation, the three neural networks presented in chapter \ref{c:selection} with the same datasets were tested on an evaluation board. \newline
+In the case of the \ac{aec}, the only calculation the neural network does is the compression and decompression of the input data. Hence the comparison of these two data vectors (input and ouput) have to be done in the program. \newline
+In the listing \ref{l:cpp} the code to demonstrate the functionality of the model is written. To increase readability of the code, the necessary checks are not shown.
+
+\begin{lstlisting}[caption={model-load}, language=c++, label={l:cpp}]
+#include <cstdio>
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
+#include "tensorflow/lite/optional_debug_tools.h"
+
+size_t load_data_from_file(const char * filename,
+ float buffer[]);
+void interfere_model(std::unique_ptr<tflite::Interpreter> 
+ &interpreter, float buffer[], size_t length);
+bool check_result((std::unique_ptr<tflite::Interpreter> 
+ &interpreter, float boundary);
+
+int main(int argc, char* argv[]) {
+ const char* model_file = argv[1];
+ const char* data_file = argv[2];
+
+ // Load model
+ std::unique_ptr<tflite::FlatBufferModel> model =
+  tflite::FlatBufferModel::BuildFromFile(filename);
+	
+ // Build the interpreter to read the model
+ tflite::ops::builtin::BuiltinOpResolver resolver;
+ tflite::InterpreterBuilder builder(*model, resolver);
+ std::unique_ptr<tflite::Interpreter> interpreter;
+ builder(&interpreter);
+  
+ // Allocate tensor buffers.
+ interpreter->AllocateTensors();
+ tflite::PrintInterpreterState(interpreter.get());
+
+ // Interfere model (interpreter->Invoke())
+ float buffer[5256*100];
+ size_t length = load_data_from_file(data_file, buffer);
+ infere_model(interpreter, buffer, length);
+
+ return 0;
+}
+\end{lstlisting}
+
+The evaluation board consists of an ARM Cortex-A9 core with a frequency of $\SI{1}{\giga\hertz}$ and it has $\SI{1}{\giga\byte}$ of RAM. \newline
+In table \ref{t:performance} the needed clock cycles for execution of these models are listed. The performance was only measured for the interference of the model and the evaluation, not for the model allocation and not for loading the datasets.
+
+\begin{table}[htb]
+\centering
+\caption{Performance measurement of the three models presented in chapter \ref{c:selection}}
+\label{t:performance}
+\begin{tabular}{lllll}
+\toprule
+Model		& Total Params	& Trainable Params	& Clock Cycles		& Seconds \\ \midrule
+\ac{aec}	& $\num{5125}$	& $\num{5125}$		& $\num{344e3}$	& $\num{0.344}$ \\
+\ac{lstm}	& $\num{6300}$	& $\num{6300}$		& $\num{134e6}$	& $\num{134}$ \\
+\ac{svm}	& $\num{210947}$ & $\num{4099}$	& $\num{785e4}$	& $\num{7.6}$ \\
+\bottomrule
+\end{tabular}
+\end{table}

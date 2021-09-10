@@ -1,0 +1,257 @@
+\chapter{Anomaly Detection and Techniques - A Deeper Look}
+\label{c:selection}
+To get some first estimations and results, a closer look upon the described techniques from chapter \ref{c:new_techniques} is taken. As all techniques have similar complexity and are used in their most simple version, the computational power is not investigated at this point. Instead their error rates of detecting anomalies in given datasets will be analysed. Hence some datasets are created and analysed by these techniques and algorithms. All algorithms are provided by special libraries and are not implemented from scratch.
+
+First, the used programming library Tensorflow \cite{tf-web} is described, which provides the platform for all the used techniques. Second, the generation and configuration of the training set as well as the validation set will be discussed. With these two things at hand, three machine learning techniques will be analysed: \ac{aec}, \ac{svm} and \ac{lstm}. Unfortunately the \ac{knn} is not supported by tensorflow, thus it has to be left out in the evaluation.
+
+\section{Tensorflow}
+To focus more on the techniques themselves and less on the development of specific algorithms, the fully integrated machine learning library Tensorflow \cite{tf-web} is used. It is written in C++ with Python and C++ API. As the models are written in Python scripts, every technique shown in the following can be easily referenced, adapted, modified and extended in further investigations.
+
+The neural networks being built and used consist only of a few layers to keep them as simple as the generated anomaly test cases.
+
+	\subsection{TF-Lite Models}
+	Tensorflow allows the export of trained models of neural networks of any kind. These models can then be modified to be \enquote{tf-lite} models. The Lite version of Tensorflow is made to be lightweight, so they can be executed on systems with low resources and computing power, like a System-on-Chip used in a satellite. To execute the exported models on a different platform, two parts are needed. One is the code library to execute tf-lite models. And the second is of course the model itself, to describe the trained neural network. These models are in fact small in their size, but unfortunately they are restricted in their functionality in some parts. Thus some modification might be necessary in order to export them onto a different system later on. 
+
+	It has to be noted, that the Tensorflow code library itself takes a lot of permanent storage, relative to the tf-lite models. But as the code library stays constant, while the only exchangeable parts are the models, this is considered not much of a problem.
+	
+\section{Generating Training and Validation Sets}
+In chapter \ref{c:anomaly_definition}, we defined three cases of anomalies (slope, pulse and sine). In the following we will first define the parameters and shape of the general dataset used for training and validation. Respectively a look into the anomalous datasets and their parameters is taken.
+
+For all anomalies put into the training set and validation set it holds, that their effect always takes half an orbit period ($t_a=50$ minutes) and that they start on random positions $t_0$ within one orbit. For both training and validation, the anomaly parameters are equal and every dataset holds only one type of anomaly. Their parameters are then changed with every new set of training and validation datasets. \newline
+Regarding the amount of anomalies, the training set contains 1\% and the valdiationset 10\% anomalous orbits. The anomalies in the training set are put in to simulate an unclean dataset, which might be a very likely case, as we are assuming the learning is done during the mission. The bigger amount of anomalies in the validation set is set to increase confidence in the evaluation results. \newline
+Both datasets have labels for normal and anomalous data. These labels are strictly used for the validation as we are focusing on unsupervised learning.
+
+	\subsection{Training Set Definition}
+	The training set is based on a normalized arbitrary sensor varying over one orbit period as can be seen in figure \ref{f:trainingset}. The data starts at $x(t=0) = 0.5$ and has its maximum at $x(t=50) = 1.0$. The timesteps are based on a LEO satellite with an orbital period of 100 minutes and one datapoint per minute. Additionally Gaussian white noise is added with a standard deviation of $\sigma = 0.05$. \newline
+	One could interpret the data-curve for example as a temperature or current sensor increasing its value up to 100\% in the vicinity of the sun and reducing its value to 50\% during the eclipse.
+	
+	Before training with the model, the datasets are scaled down to never exceed any value above one. The reason is that certain activation functions only produce values between $\pm 1$, thus making it impossible to learn representations with greater values.
+
+	\begin{figure}[htb]
+	\centering
+	\input{./2_Selection/training_set.pgf}
+	\caption{Arbitrary satellite sensor data over 100 minutes with 1 datapoint per minute.}
+	\label{f:trainingset}
+	\end{figure}
+
+	\subsection{Slopeset}
+	The slope represents a drifting sensor that shifts the original data $x(t)$ permanently for the rest of the respective orbital period:
+	
+	\begin{equation}
+	\tilde{x}(t) = x(t) + \begin{cases} 
+	0 & t < t_0 \\
+	(t - t_0) \cdot m & t_0 < t < (t_a+t_0)\\ 
+	t_a \cdot m & (t_a+t_0) < t \\
+	\end{cases}
+	\end{equation}
+
+	In figure \ref{f:slopeset} an anomalous drift with a slope of $m=0.01$ is represented. This slope will be varied to test the anomaly detection.	
+	
+	\begin{figure}[htb]
+	\centering
+	\input{./2_Selection/slope_query_set_m0.0100.pgf}
+	\caption{Arbitrary satellite sensor data over 100 minutes with 1 datapoint per minute with a slope anomaly of $m=0.01$.}
+	\label{f:slopeset}
+	\end{figure}
+	
+	\subsection{Pulseset}
+	The pulse represents a single event effect which might offset the data temporary or permanently. Such an effect can cause a destruction of a component in the worst case. In the best case the faulty sensor may actually be recovered. 
+	
+	In this case, only a temporary non-destructive pulse is assumed, as this shape is harder to detect than a permanently offset curve. The anomaly is described by:
+	
+	\begin{equation}
+	\tilde{x}(t) = x(t) \cdot \begin{cases} 
+	h & t_0 < t < (t_a+t_0)\\ 
+	1 & \text{other} \\
+	\end{cases}	
+	\end{equation}
+	
+	The pulse gets multiplied instead of added onto the values to better align with the current values on the original curve. In figure \ref{f:pulseset} an anomalous pulse with the height $h=1.5$ is represented. The height of the pulse will be varied to test the anomaly detection.
+
+	\begin{figure}[htb]
+	\centering
+	\input{./2_Selection/pulse_query_set_h1.500.pgf}
+	\caption{Arbitrary satellite sensor data over 100 minutes with 1 datapoint per minute with a pulse anomaly of $h=1.5$.}
+	\label{f:pulseset}
+	\end{figure}
+		
+	\subsection{Sineset}
+	The sine represents an oscillating sensor value which can have many different causes. But the effect may be severe as the oscillation might apparently cancel out in averaging or slow measurements.
+	
+	Again, only a temporary anomaly is assumed. The sine gets added onto the original curve for alignment:
+	
+	\begin{equation}
+	\tilde{x}(t) = x(t) + \begin{cases} 
+	a\cdot \sin \left( 2 \pi\cdot \frac{t - t_0}{T} \right) & t_0 < t < (t_a+t_0)\\ 
+	0 & \text{other} \\
+	\end{cases}	
+	\end{equation}
+	
+	In figure \ref{f:sineset} an anomalous sine with the amplitude of $a=0.1$ and a period of $T=10$ is represented. The amplitude is varied to test the anomaly detection. The period is an integer part of the anomaly length $t_a$.
+
+	\begin{figure}[htb]
+	\centering
+	\input{./2_Selection/sine_query_set_a0.100.pgf}
+	\caption{Arbitrary satellite sensor data over 100 minutes with 1 datapoint per minute with sine anomaly of $a=0.1$ and $T=10$.}
+	\label{f:sineset}
+	\end{figure}
+
+\section{Evaluation of Anomaly Detection Techniques}
+To test and evaluate the discussed anomaly detection techniques, they are first trained accordingly with a training set (1\% anomalies) and then queried with a validation set (10\% anomalies). As a reference, one year of operation is taken, leading to a total of $N = 5256$ orbits within each dataset. A specific orbit will be referenced with an index $i = 1, \hdots, N$. With a trained model at hand, the validation set is fed in. The technique shall now detect and report every identified anomaly. These results are then compared to the actual labels of the corresponding validation set to check if the detection is working correctly. \newline
+For an overall comparison the effective detection rate is measured. This includes the percentage of detected anomalies (true-positive-rate) and the percentage of miss-categorizations (false-positive-rate). 
+
+First the discussed techniques are set up in a way to give the best result with the least amount of computation power, in order to achieve a realistic test-scenario. This includes for example the number of nodes, layers and training epochs. \newline
+Furthermore, the decision boundary between normal and anomalous data is set to allow on average only one miss-categorization (false-positive) per month, so 12 miss-categorizations per dataset or respectively 0.23\%.
+
+In the following the individual algorithms are first examined and set up. And in the end, a comparison between each technique in the respective anomaly domain is drawn.
+
+	\bigbreak
+	
+	The used ranges for the training sets as well as validation sets can be found in the following table \ref{t:parameter-range}:
+	
+	\begin{table}[htb]
+	\centering
+	\begin{tabular}{llll}
+	\toprule
+	Parameter	& Start		& Stop		& Steps		\\ \midrule
+	Slope $m$	& 0.0001	& 0.0051	& 0.0001	\\
+	Pulse $h$	& 1.004		& 1.204		& 0.004		\\
+	Sine $a$	& 0.003		& 0.153		& 0.003		\\ \bottomrule
+	\end{tabular}
+	\caption{Parameter range for the three anomaly types.}
+	\label{t:parameter-range}
+	\end{table}
+
+	\subsection{Auto-Encoder}
+	The used \ac{aec} has an input and output with the size of the dataset. It has only one hidden layer consisting of 25 nodes. Therefore, only one encoding matrix $\mathbf{W}_e$ and one decoding matrix $\mathbf{W}_d$ are needed. The number of nodes was chosen as a comprise between computing resources and detection quality. The training time it took for convergence was usually 4 to 5 epochs. For more details of the model, see the source code in chapter \ref{c:src_aec}.
+	
+	To distinguish between normal an anomalous data, the difference between the original curve and the output of the \ac{aec} are compared:
+	
+	\begin{equation*}
+	e_i = \left| \mathbf{x}_i - \mathbf{y}_i \right|
+	\end{equation*}
+	
+	Now a boundary has to be estimated to know if the error $e_i$ indicates an anomaly. This can be done by taking the training set and storing all the errors in a vector $\mathbf{e}$. This vector $\mathbf{e}$ is then sorted for ascending values. Then we have to make two assumption. First that most of our data is not anomalous, for example at least 90\%. Second, that our error $\mathbf{e}$ is a normal distribution, which is the case for the dataset used here. \newline
+	With this, one can cut off the lower half of the vector $\mathbf{e}$. This gives a curve with an almost linear slope in the beginning and a exponential ascend in the end. From these two parts on the curve two linear fits can be made. One following the linear part and one the exponential ascend. To find the cut off between linear and exponential part, the intersection of the to linear fits is calculated. This cut off value $e_i$ is then used as the boundary. The visualisation of the evaluation curves can be seen in figure \ref{f:cutoff}. \newline
+	Additionally this processing step could also be used to first prune the data and to repeat the whole process to get a more accurate boundary.
+	
+	\begin{figure}[htb]
+	\centering
+	\input{./2_Selection/cutoff.pgf}
+	\caption{Two linear fits with an intersection to find the boundary value $e_i$.}
+	\label{f:cutoff}
+	\end{figure}
+	
+	To better understand the details of the \ac{aec}, an example of the input $\mathbf{x}$ and output $\mathbf{y}$ is given in figure \ref{f:aec_deep}. On the left figure, the curve of a normal orbit is shown. There the de-noising effect of the \ac{aec} can be observed as the output $\mathbf{y}$ is much smoother than the initial input $\mathbf{x}$. On the right figure, an pulse anomaly is shown. Here the \ac{aec} is not able to reproduce the given input. Therefore significant differences between input and output can be found.
+	
+	\begin{figure}[htb]
+	\centering
+	\begin{minipage}[t]{0.45\textwidth}
+			\input{./2_Selection/aec_normal.pgf}
+	\end{minipage}
+	\begin{minipage}[t]{0.45\textwidth}
+			\input{./2_Selection/aec_anomaly.pgf}
+	\end{minipage}
+	\caption{Input and output of the \ac{aec} with normal and anomalous data.}
+	\label{f:aec_deep}
+	\end{figure}
+
+	\subsection{Support Vector Machine}
+	In the case of \acp{svm}, a special change had to be made for the training. As \acp{svm} are only available as trainable kernel machines \cite{tf-svm} in tensorflow, labels had to be added to the training set. But in general it has been shown that \acp{svm} can also be successfully trained unsupervised, as so called One-Class SVM \cite{one-class-svm}.
+	
+	To train the network, a rather high number of epochs has to be used. After around 10 epochs the \ac{svm} stopped converging, unfortunately with a still quite high prediction error. But as the model uses only the \ac{svm} layer, which is mapped to an output layer of two variables, this uncertainty might be reasonable. The two output variables are referring to anomaly ($y_+$) and non-anomaly ($y_-$). \newline
+	The used layer dimension with 2048 nodes was also quite high to achieve a reasonable accuracy. As a result, the computation to train the neural network got substantially bigger than the \ac{aec}.
+		
+	To now separate normal and anomalous datasets after the training, the two variables ($y_+$ and $y_-$) on the output were compared. Whichever had the higher result made the decision for normal and anomalous. This did yield the lowest false-positive rate with 0.0\%. But this also had rather low true-positive rate being much below 50\%. \newline
+	To further increase the true-positive rate the boundary decisions were shifted. This was done by averaging the predictions $y_+$ and $y_-$ for the training set and shifting these values towards to the edge of their miss-categorization. In the following an example calculation for the corrected anomaly output $\hat{y}_+$ is given:
+	
+	\begin{align*}
+	\overline{y}_{pp} &= \frac{1}{N_+}\cdot \sum_{i=1}^N y_+ (\mathbf{x}_i) \cdot \alpha_i \\
+	\overline{y}_{fp} &= \frac{1}{N_-}\cdot \sum_{i=1}^N y_+ (\mathbf{x}_i) \cdot \left| \alpha_i - 1 \right| \\
+	\hat{y}_+ &= \frac{\overline{y}_{pp} - \overline{y}_{fp}}{10} + \overline{y}_{fp}
+	\end{align*}
+
+	Here $\alpha_i$ equals one for anomalies and zero for normal data. To put the equation into words, the average miss-categorization level (false-positive) of the anomaly output $y_+$ is shifted 10\% towards its way to the average true-positive level. Therefore every $y_+(\mathbf{x})$ value above $\hat{y}_+$ is counted as anomalous. The same procedure is applied to the normal output $y_-(\mathbf{x})$.
+	
+	In conclusion, a \ac{svm} might not be a good solution to analyse these kind of datasets with high noise and rather subtle differences between normal and anomalous examples.
+	
+	\subsection{Long-Short-term Memory}
+	As \acp{lstm} are used for predictions, the use of the datasets is getting slightly modified. To learn a future prediction from a given set, the network is given an input of $\mathbf{x}_i$ and should predict an output of $\mathbf{x}_{i+1}$ for the following orbit. Hence the input and output datasets were still from the same dataset, but shifted by one orbit. \newline
+	The prediction time here doesn't need to be necessarily one orbit period. For example, one could also chose a sliding window and only predict a few minutes ahead. Here we chose to just always predict the following orbit from a previous one. Thus the \ac{lstm} only needs one cell layer. 
+
+	The cut-off value was chosen the same way as it was done with the \ac{aec}. To now take a look on what the predictions of the \ac{lstm} are for the normal and anomalous data, the graphs in figure \ref{f:lstm_deep} are given. On the left the normal curve is shown and on the right the anomalous one. Again, just like the \ac{aec} the \ac{lstm} learned a normal presentation of the data as the anomalies in the training data occurred randomly. \newline
+	Unfortunately this example can't show the true potential of \acp{lstm}. An \ac{lstm} could learn for example multiple patterns as well as their sequence if they are periodical.
+		
+	\begin{figure}[htb]
+	\centering
+	\begin{minipage}[t]{0.45\textwidth}
+			\input{./2_Selection/lstm_normal.pgf}
+	\end{minipage}
+	\begin{minipage}[t]{0.45\textwidth}
+			\input{./2_Selection/lstm_anomaly.pgf}
+	\end{minipage}
+	\caption{Input and future prediction of the \ac{lstm} with normal and anomalous data}
+	\label{f:lstm_deep}
+	\end{figure}	
+	
+	\subsection{Test Results and Comparison}
+	For comparison the 	true-positive rates of the three detection techniques are analysed. Additionally the false-positive rate is shown to check for any irregularities. 
+
+	The graphs of the results are shown in the following chapters, see figure \ref{f:slope}, \ref{f:pulse} and \ref{f:sine}. Generally speaking, there are no huge differences between the detection techniques. Only the \ac{svm} seems to have a slight disadvantage in the overall comparison, especially in the domain of sine anomalies. The \ac{aec} and \ac{lstm} perform almost equally well. \newline %TODO signal-to-noise-ratio
+	If one takes a look at the absolute numbers where the detection reaches almost a hundred percent, it can be noticed that the difference between normal and anomalous data are quite small and almost indistinguishable for a human. To illustrate this, the example of the pulse anomaly is taken. Here the detection is already at 100\% at the height $h=1.1$. Speaking of current sensors, an increase of 10\% in the current would lead to a power increase 21\% above normal, which is usually well below the critical limit.
+	
+	In the following the test results are discussed in more detail.	
+	
+	\subsubsection{Slope Anomaly}
+	The slope anomaly results are presented in figure \ref{f:slope}. The anomaly was detected by all techniques equally. This implies also, that a drifting sensor might be detected in an early, non-critical state. \newline
+	The detection of 100\% is met at a slope of $m \approx \num{2.5e-3}$, which is equivalent to a total value increase of $\approx 12\%$ over the course of 50 minutes.
+	
+\begin{figure}[htb]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+		\input{./2_Selection/slope_pp.pgf}
+		\subcaption{True-Positive rate}
+\end{minipage}
+\begin{minipage}[t]{0.45\textwidth}
+		\input{./2_Selection/slope_fp.pgf}
+		\subcaption{False-Positive rate}
+\end{minipage}
+\caption{Almost equivalent rates in the slope detection for all three techniques}
+\label{f:slope}
+\end{figure}
+		
+	\subsubsection{Pulse Anomaly}
+	The pulse anomaly results are presented in figure \ref{f:pulse}. The anomaly was detected best by the \ac{aec}, second by the \ac{lstm} and worst by the \ac{svm}. As the differences in the detection are quite small, this is not much of a concern. \newline
+	The detection of 100\% is met at a height of $h \approx \num{1.1}$. 
+
+\begin{figure}[htb]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+		\input{./2_Selection/pulse_pp.pgf}
+		\subcaption{True-Positive rate}
+\end{minipage}
+\begin{minipage}[t]{0.45\textwidth}
+		\input{./2_Selection/pulse_fp.pgf}
+		\subcaption{False-Positive rate}
+\end{minipage}
+\caption{Slight advantage for the \ac{aec} in the pulse detection}
+\label{f:pulse}
+\end{figure}
+		
+	\subsubsection{Sine Anomaly}
+		The sine anomaly results are presented in figure \ref{f:sine}. The anomaly was detected best by the \ac{lstm} and worst by the \ac{svm}. This could imply that the \ac{svm} has trouble detecting values that oscillate around the expected values.\newline	
+	The detection of 100\% with the \ac{lstm} as well as \ac{aec} is met at an amplitude of $a \approx \num{0.12}$. 
+
+\begin{figure}[htb]
+\centering
+\begin{minipage}[t]{0.45\textwidth}
+		\input{./2_Selection/sine_pp.pgf}
+		\subcaption{True-Positive rate}
+\end{minipage}
+\begin{minipage}[t]{0.45\textwidth}
+		\input{./2_Selection/sine_fp.pgf}
+		\subcaption{False-Positive rate}
+\end{minipage}
+\caption{\ac{aec} and \ac{lstm} are almost equal whereas the \ac{svm} has quite some detection problems}
+\label{f:sine}
+\end{figure}
