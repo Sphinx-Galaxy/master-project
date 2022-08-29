@@ -3,10 +3,9 @@
 This project discusses the use of A.I in satellite missions for telemetry analysis and anomaly detection.
 
 In the respectives subfolders are:
-- 'Docs' Cited papers, handbooks, books and reference manuals
 - 'Scripts' Various python scripts for an easier workflow
 - 'Tensorflow' All A.I scripts, models, testdata and results
-- 'Tex' The project documentation in Latex
+- 'Documentation' The project documentation in Latex
 
 # Project structure
 
